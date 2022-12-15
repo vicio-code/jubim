@@ -1,0 +1,220 @@
+import { type NextPage } from "next";
+import Head from "next/head";
+import anime from "animejs";
+import React, { useEffect, useState } from "react";
+import cn from "classnames";
+import confetti from "canvas-confetti";
+
+const useWidth = () => {
+  const [width, setWidth] = useState(0);
+  const handleResize = () => setWidth(document.body.clientWidth);
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [width]);
+  return width;
+};
+
+const useHeight = () => {
+  const [height, setHeight] = useState(0);
+  const handleResize = () => setHeight(document.body.clientHeight);
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [height]);
+  return height;
+};
+
+const Grid = (data: { columns: number; rows: number }) => {
+  const { columns, rows } = data;
+  const [toggle, setToggle] = useState(false);
+
+  const handleOnClick = (index: number) => {
+    document.body.classList.toggle("toggled");
+    setToggle(!toggle);
+
+    anime({
+      targets: ".tile",
+      opacity: toggle ? 1 : 0,
+      delay: anime.stagger(50, {
+        grid: [columns, rows],
+        from: index,
+      }),
+    });
+  };
+
+  const createTiles = (quantity: number) =>
+    Array.from(Array(quantity)).map((tile, index) => (
+      <div
+        key={index}
+        className={cn(toggle ? "opacity-0" : "opacity-100", "tile")}
+        onClick={() => handleOnClick(index)}
+      ></div>
+    ));
+
+  const tiles = createTiles(columns * rows);
+
+  const style = { "--rows": rows, "--columns": columns } as React.CSSProperties;
+
+  return (
+    <div id="tiles" style={style}>
+      {tiles.map((tile) => tile)}
+    </div>
+  );
+};
+
+const Star = () => {
+  const [show, setShow] = useState(false);
+  const interval = 1000;
+  const rand = (min: number, max: number) =>
+    Math.floor(Math.random() * (max - min + 1)) + min;
+  const index = rand(1, 3);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShow(!show), index * (interval / 3));
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [show, index]);
+
+  const style = {
+    "--star-left": `${rand(-10, 100)}%`,
+    "--star-top": `${rand(-30, 80)}%`,
+    offsetHeight: "",
+  } as React.CSSProperties;
+  return show ? (
+    <span style={style} className="magic-star">
+      <svg viewBox="0 0 512 512">
+        <path d="M512 255.1c0 11.34-7.406 20.86-18.44 23.64l-171.3 42.78l-42.78 171.1C276.7 504.6 267.2 512 255.9 512s-20.84-7.406-23.62-18.44l-42.66-171.2L18.47 279.6C7.406 276.8 0 267.3 0 255.1c0-11.34 7.406-20.83 18.44-23.61l171.2-42.78l42.78-171.1C235.2 7.406 244.7 0 256 0s20.84 7.406 23.62 18.44l42.78 171.2l171.2 42.78C504.6 235.2 512 244.6 512 255.1z" />
+      </svg>
+    </span>
+  ) : (
+    <></>
+  );
+};
+
+const MagicText = (data: { text: string }) => {
+  const { text } = data;
+
+  return (
+    <span className="magic">
+      <Star />
+      <Star />
+      <Star />
+      <span className="magic-text">{text}</span>
+    </span>
+  );
+};
+
+const Home: NextPage = () => {
+  const [initH, setInitH] = useState(0);
+  const [initW, setInitW] = useState(0);
+  const initSize = initW > 800 ? 100 : 50;
+  const initRow = Math.floor(initH / initSize);
+  const initColums = Math.floor(initW / initSize);
+
+  const windowHeight = useHeight();
+  const windowWidth = useWidth();
+  const size = windowWidth > 800 ? 100 : 50;
+  const rows = Math.floor(windowHeight / size);
+  const columns = Math.floor(windowWidth / size);
+
+  const [anwser, setAnswer] = useState(false);
+
+  useEffect(() => {
+    const initalHeight = document.body.clientHeight;
+    setInitH(initalHeight);
+
+    const initalWidth = document.body.clientWidth;
+    setInitW(initalWidth);
+  }, []);
+
+  const buttonHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    const duration = 15 * 1000;
+    const end = Date.now() + duration;
+    function frame() {
+      // launch a few confetti from the left edge
+      confetti({
+        particleCount: 5,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        ticks: 35,
+      });
+      confetti({
+        particleCount: 5,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0, y: 0.8 },
+        ticks: 35,
+      });
+      // and launch a few from the right edge
+      confetti({
+        particleCount: 5,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        ticks: 35,
+      });
+      confetti({
+        particleCount: 5,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1, y: 0.8 },
+        ticks: 35,
+      });
+
+      // keep going until we are out of time
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    }
+    frame();
+    setTimeout(confetti, duration + 2000);
+
+    setAnswer(true);
+  };
+
+  return (
+    <>
+      <Head>
+        <title>Create T3 App</title>
+        <meta name="description" content="Generated by create-t3-app" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      {rows && columns ? (
+        <Grid columns={columns} rows={rows} />
+      ) : (
+        <Grid columns={initColums} rows={initRow} />
+      )}
+
+      <div className="centered z-10 flex flex-col items-center">
+        {anwser ? (
+          <>
+            <h1 className=" pointer-events-none text-[200px] font-extrabold leading-normal text-slate-200">
+              {<MagicText text="SIM" />}
+            </h1>
+          </>
+        ) : (
+          <>
+            <h1 className="pointer-events-none text-6xl font-extrabold leading-normal text-slate-200">
+              o {<MagicText text="jubim" />} já formou?
+            </h1>
+            <div className="card">
+              <div className="card-content">
+                <button type="button" onClick={buttonHandler}>
+                  <h1 className="centered text-3xl font-extrabold leading-normal text-slate-200">
+                    descubra!
+                  </h1>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </>
+  );
+};
+
+export default Home;

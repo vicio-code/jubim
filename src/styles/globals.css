@@ -1,0 +1,178 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --g1: rgb(252, 87, 94);
+  --g2: rgb(247, 180, 44);
+  --g3: rgb(98, 0, 234);
+  --g4: rgb(236, 64, 122);
+  --g5: rgb(253, 216, 53);
+}
+
+@keyframes background-pan {
+  from {
+    background-position: 0% center;
+  }
+
+  to {
+    background-position: -200% center;
+  }
+}
+
+@keyframes scale {
+  from,
+  to {
+    transform: scale(0);
+  }
+
+  50% {
+    transform: scale(1);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(180deg);
+  }
+}
+
+body {
+  animation: background-pan 10s linear infinite;
+  background: linear-gradient(to right, var(--g1), var(--g2), var(--g1));
+  background-size: 200%;
+  height: 100vh;
+  overflow: hidden;
+  margin: 0px;
+}
+
+/* body.toggled > #title {
+  opacity: 0;
+} */
+
+body.toggled > #icon {
+  opacity: 1;
+}
+
+body.toggled > #__next > #tiles > .tile:hover {
+  opacity: 0.1 !important;
+}
+
+#tiles {
+  height: calc(100vh - 1px);
+  width: calc(100vw - 1px);
+  position: relative;
+  z-index: 2;
+
+  display: grid;
+  grid-template-columns: repeat(var(--columns), 1fr);
+  grid-template-rows: repeat(var(--rows), 1fr);
+}
+
+.tile {
+  cursor: pointer;
+  position: relative;
+}
+
+.tile:hover:before {
+  background-color: rgb(30, 30, 30);
+}
+
+.tile:before {
+  background-color: rgb(15, 15, 15);
+  content: "";
+  inset: 0.5px;
+  position: absolute;
+}
+
+.centered {
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.card {
+  aspect-ratio: 4;
+  border: 0.4vmin solid rgb(3, 169, 244);
+  cursor: pointer;
+  width: 45vmin;
+  background-color: rgb(15, 15, 15);
+  position: relative;
+}
+
+.card:hover:before {
+  background-position: 100% 100%;
+  transform: scale(1.08, 1.13);
+}
+
+.card:hover > .card-content {
+  background-position: -10% 0%;
+}
+
+.card:before {
+  background: linear-gradient(
+    130deg,
+    transparent 0% 33%,
+    var(--g3) 66%,
+    var(--g4) 83.5%,
+    var(--g5) 100%
+  );
+  background-position: 0% 0%;
+  background-size: 300% 300%;
+  content: "";
+  height: 105%;
+  width: 105%;
+  left: 0px;
+  pointer-events: none;
+  position: absolute;
+  top: 0px;
+  transition: background-position 1250ms ease, transform 350ms ease;
+  z-index: 10;
+}
+
+.card-content {
+  padding: 5vmin;
+  position: relative;
+  z-index: 10;
+}
+
+.magic-text {
+  animation: background-pan 3s linear infinite;
+  background: linear-gradient(to right, var(--g3), var(--g4), var(--g3));
+  background-size: 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  white-space: nowrap;
+}
+
+.magic {
+  display: inline-block;
+  position: relative;
+}
+
+.magic-star > svg {
+  animation: rotate 1000ms linear infinite;
+  display: block;
+  opacity: 0.7;
+}
+
+.magic-star > svg > path {
+  fill: var(--g4);
+}
+
+.magic-star {
+  --size: clamp(20px, 1.5vw, 30px);
+
+  animation: scale 700ms ease forwards;
+  display: block;
+  height: var(--size);
+  left: var(--star-left);
+  position: absolute;
+  top: var(--star-top);
+  width: var(--size);
+}
